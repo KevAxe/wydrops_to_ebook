@@ -1,0 +1,59 @@
+#!/usr/bin/env python
+# -*- encoding:utf-8 -*-
+# author: KevAxe
+# email: kevaxe@qq.com
+
+from calibre.web.feeds.recipes import BasicNewsRecipe
+import ConfigParser
+import sys,os
+
+class wydrops(BasicNewsRecipe):
+	file_path = 'C:\Users\KevAxe\Desktop\wybooks'
+	conf = ConfigParser.ConfigParser()
+	conf.read(file_path + os.sep + 'rule.conf')
+	title = conf.get('info','title') #标题
+	__author__ = 'KevAxe'
+	description = 'Collected from drops.wooyun.org,by KevAxe'
+	no_stylesheets = True
+	language = 'zh-CN'
+	url_prefix = 'http://drops.wooyun.org'
+	keep_only_tags = [{'class':['entry ng-scope']}]
+	if conf.get('info','reverse_article_order') == 'True':
+		reverse_article_order =  True #True表示将文章顺序从旧到新排序
+	max_articles_per_feed = 99999
+	timefmt = '[%Y%b%d]'
+
+	def parse_index(self):
+		articles = []
+		start_page = int(self.conf.get('info','start_page')) #爬取的开始页
+		end_page = int(self.conf.get('info','end_page')) #爬取的结束页
+		category = self.conf.get('info','category') #分类
+		search_key = self.conf.get('info','search_key') #搜索关键字
+		#end_page值为0时，获取所有文章
+		if end_page == 0:
+			first_soup = self.index_to_soup(self.url_prefix + category + '/page/1?s='+ search_key +'&submit=%E6%90%9C%E7%B4%A2')
+			page_num = int(str(first_soup.findAll(**{'class':'pages'})[0]).split()[4]) #获取总页数
+			end_page = page_num
+			if page_num == 0:
+				end_page = 1
+
+		for page in range(start_page,end_page+1):
+			soup = self.index_to_soup(self.url_prefix + category + '/page/' + str(page) + '?s='+ search_key +'&submit=%E6%90%9C%E7%B4%A2')
+			print 'page '+ page + ':' + self.url_prefix + category + '/page/' + str(page) + '?s='+ search_key +'&submit=%E6%90%9C%E7%B4%A2'
+			soup_titles = soup.findAll(**{'class':'entry-title'})
+			for link in soup_titles:
+				li = link.a
+				til = str(li.contents[0])
+				#print til
+				#print type(til)
+				url = li['href']
+				a = {'title':til,'url':url}
+				articles.append(a)
+		book = [(self.title,articles)]
+
+		return book
+
+
+
+
+
