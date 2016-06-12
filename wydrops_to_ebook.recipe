@@ -39,7 +39,7 @@ class wydrops(BasicNewsRecipe):
 
 		for page in range(start_page,end_page+1):
 			soup = self.index_to_soup(self.url_prefix + category + '/page/' + str(page) + '?s='+ search_key +'&submit=%E6%90%9C%E7%B4%A2')
-			print 'page '+ page + ':' + self.url_prefix + category + '/page/' + str(page) + '?s='+ search_key +'&submit=%E6%90%9C%E7%B4%A2'
+			print 'page '+ str(page) + ':' + self.url_prefix + category + '/page/' + str(page) + '?s='+ search_key +'&submit=%E6%90%9C%E7%B4%A2'
 			soup_titles = soup.findAll(**{'class':'entry-title'})
 			for link in soup_titles:
 				li = link.a
